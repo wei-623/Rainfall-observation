@@ -35,10 +35,12 @@
         .btn-action { padding: 12px 24px; border-radius: 30px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; transition: 0.1s; }
         .btn-action:active { transform: scale(0.95); }
         .btn-theme { background: #f1c40f !important; color: #333 !important; border: none; }
+        .btn-download { border-color: var(--green) !important; color: var(--green) !important; }
+        .btn-download:hover { background: var(--green) !important; color: white !important; }
 
         /* 雨量卡片 */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-        .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 22px; position: relative; border: 1px solid var(--border); transition: 0.3s; }
+        .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 22px; position: relative; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
 
         /* --- 雨滴特效強化 --- */
         .rain-gauge { width: 50px; height: 105px; border: 2.5px solid rgba(189,195,199,0.5); border-radius: 8px 8px 18px 18px; position: relative; background: rgba(0,0,0,0.05); overflow: hidden; transform: translateZ(0); }
@@ -60,7 +62,7 @@
         @keyframes splashAnim { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
 
         /* 彈窗系統 */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); backdrop-filter: blur(25px); padding: 25px; border-radius: 30px; z-index: 9000; width: 85%; max-width: 400px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); backdrop-filter: blur(25px); padding: 25px; border-radius: 30px; z-index: 9000; width: 85%; max-width: 400px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 8999; }
         
         .city-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
@@ -86,12 +88,12 @@
 </div>
 
 <div class="modal" id="helpModal">
-    <h2 style="margin-top: 0; color: var(--blue); text-align: center;">WEI雨量觀測網功能導引</h2>
+    <h2 style="margin-top: 0; color: var(--blue); text-align: center;">ＷＥＩ功能導引</h2>
     <div style="font-size: 0.95rem; line-height: 1.8;">
         <p>💧 <b>CSS 原生雨滴</b>：效能升級，下雨測站特效穩定呈現。</p>
         <p>🔘 <b>大型切換鈕</b>：加大排序功能選單，點選更精確。</p>
         <p>🌍 <b>地區快速篩選</b>：點擊按鈕開啟全台縣市九宮格選單。</p>
-        <p>⚡ <b>極速圖資中心</b>：預載入技術，切換雷達影像秒讀取。</p>
+        <p>📥 <b>匯出觀測數據</b>：一鍵將當前雨量資料下載為 CSV。</p>
     </div>
     <button class="btn-action" style="width: 100%; justify-content: center; margin-top: 20px; background: var(--blue); color: white; border: none; padding: 15px;" onclick="acceptHelp()">開始觀測</button>
 </div>
@@ -109,15 +111,15 @@
     </div>
     <div style="background:#111; padding:15px; text-align:center; color: white;">
         <p id="mapTitle" style="font-weight:bold; margin-bottom:5px;"></p>
-        <button class="btn-action" style="background:#444; color:white; border:none; margin:10px auto;" onclick="closeAllModals()">關閉觀測圖</button>
+        <button class="btn-action" style="background:#444; color:white; border:none; margin:10px auto;" onclick="closeAllModals()">關閉</button>
     </div>
 </div>
 
 <div class="container">
     <header>
-        <h1 style="letter-spacing: 2px; font-weight: 900; margin: 0;">WEI雨量觀測網</h1>
+        <h1 style="letter-spacing: 2px; font-weight: 900; margin: 0;">ＷＥＩ雨量觀測網</h1>
         <span class="source-tag">📡 資料來源：中央氣象署 (CWA)</span>
-        <div class="sync-tag"><div class="status-dot"></div><span>更新時間(每十分鐘更新)：<b id="topUpdateTime">連線中...</b></span></div>
+        <div class="sync-tag"><div class="status-dot"></div><span>同步時間：<b id="topUpdateTime">連線中...</b></span></div>
     </header>
 
     <div class="controls-row">
@@ -134,6 +136,7 @@
         
         <button class="btn-action btn-theme" onclick="toggleTheme()">🌓 模式</button>
         <button class="btn-action" onclick="openMapCenter()">🗺️ 氣象圖資</button>
+        <button class="btn-action btn-download" onclick="exportCSV()">📥 匯出資料</button>
         <button class="btn-action" onclick="openHelp()">💡 功能說明</button>
     </div>
 
@@ -207,10 +210,27 @@
             const h1 = parseFloat(s.RainfallElement.Past1hr.Precipitation) || 0, day = parseFloat(s.RainfallElement.Now.Precipitation) || 0;
             const wl = Math.min(day, 100), isF = favorites.includes(s.StationId);
             const card = document.createElement('div'); card.className = 'card';
-            card.innerHTML = `<div class="fav-btn ${isF?'active':''}" onclick="event.stopPropagation(); toggleFav('${s.StationId}')">★</div><b>${s.StationName}</b><br><small>${s.GeoInfo.CountyName}</small><div style="display:flex;align-items:center;justify-content:space-around;margin-top:10px;"><div class="rain-gauge" id="g-${s.StationId}"><div class="wave" style="height:${wl}%"></div>${h1>0?'<div class="drop"></div>':''}</div><div style="text-align:right"><div style="font-size:2rem;font-weight:900;">${(activeSort==='rain1h'?h1:day).toFixed(1)}<span style="font-size:0.75rem">${activeSort==='rain1h'?'mm/h':'mm'}</span></div><div style="font-size:0.65rem;opacity:0.6;font-weight:bold;">${activeSort==='rain1h'?'即時時雨量':'今日累積雨量'}</div></div></div>`;
+            card.innerHTML = `<div class="fav-btn ${isF?'active':''}" onclick="event.stopPropagation(); toggleFav('${s.StationId}')">★</div><b>${s.StationName}</b><br><small>${s.GeoInfo.CountyName}</small><div style="display:flex;align-items:center;justify-content:space-around;margin-top:10px;"><div class="rain-gauge" id="g-${s.StationId}"><div class="wave" style="height:${wl}%"></div>${h1>0?'<div class="drop"></div>':''}</div><div style="text-align:right"><div style="font-size:2rem;font-weight:900;">${(activeSort==='rain1h'?h1:day).toFixed(1)}<span style="font-size:0.75rem">${activeSort==='rain1h'?'mm/h':'mm'}</span></div><div style="font-size:0.65rem;opacity:0.6;font-weight:bold;">${activeSort==='rain1h'?'時雨量':'今日累積'}</div></div></div>`;
             grid.appendChild(card);
             if (h1 > 0) { const t = setInterval(() => { const g = document.getElementById(`g-${s.StationId}`); if(g) createSplash(g, 24, 100-wl); }, 900); activeTimers.push(t); }
         });
+    }
+
+    // --- 📥 匯出 CSV 函數 ---
+    function exportCSV() {
+        let csv = "測站名稱,縣市,時雨量(mm/h),累積雨量(mm),更新時間\n";
+        allStations.forEach(s => {
+            const h1 = s.RainfallElement?.Past1hr?.Precipitation || 0;
+            const day = s.RainfallElement?.Now?.Precipitation || 0;
+            csv += `${s.StationName},${s.GeoInfo.CountyName},${h1},${day},${s.ObsTime.DateTime}\n`;
+        });
+        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `雨量觀測報表_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function openMapCenter() { document.getElementById('mapModal').style.display='flex'; switchMap('rain', document.querySelector('#mapModal button')); }
