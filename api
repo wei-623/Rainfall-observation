@@ -1,0 +1,23 @@
+// api/weather.js
+export default async function handler(req, res) {
+    // 這裡的金鑰會從 Vercel 的 Environment Variables 中取得，不會出現在原始碼中
+    const API_KEY = process.env.CWA_API_KEY; 
+    const targetUrl = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=${API_KEY}`;
+
+    try {
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error('CWA API 回應錯誤');
+        
+        const data = await response.json();
+        
+        // 設定 CORS 頭部，允許瀏覽器端請求
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        
+        // 將氣象署資料傳回前端
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error('後端代理錯誤:', error);
+        return res.status(500).json({ error: '無法獲取氣象數據' });
+    }
+}
