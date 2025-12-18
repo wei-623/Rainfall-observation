@@ -27,7 +27,6 @@
         .controls-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-bottom: 20px; }
         #searchInput { padding: 14px 22px; width: 100%; max-width: 320px; border-radius: 30px; border: 1px solid var(--border); outline: none; background: var(--card-bg); color: var(--text); font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        /* 改良後的大型切換鈕 */
         .toggle-group { display: flex; background: var(--card-bg); padding: 5px; border-radius: 30px; border: 1px solid var(--border); }
         .toggle-btn { padding: 10px 20px; border-radius: 25px; border: none; background: transparent; color: var(--text); cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
         .toggle-btn.active { background: var(--blue); color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
@@ -42,37 +41,22 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
         .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 24px; padding: 22px; position: relative; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
 
-        /* --- 雨滴特效強化 --- */
+        /* 雨滴特效 */
         .rain-gauge { width: 50px; height: 105px; border: 2.5px solid rgba(189,195,199,0.5); border-radius: 8px 8px 18px 18px; position: relative; background: rgba(0,0,0,0.05); overflow: hidden; transform: translateZ(0); }
         .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; background: linear-gradient(to top, #3498db, #5dade2); transition: height 1.2s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-        
-        .drop { 
-            position: absolute; width: 4px; height: 12px; left: 23px; 
-            background: linear-gradient(to bottom, transparent, #fff, var(--blue)); 
-            border-radius: 2px;
-            animation: dropDown 0.6s infinite linear; 
-        }
-        @keyframes dropDown { 
-            0% { transform: translateY(-40px); opacity: 0; } 
-            20% { opacity: 1; }
-            100% { transform: translateY(115px); opacity: 0; } 
-        }
-
-        .splash { position: absolute; width: 3px; height: 3px; background: #5dade2; border-radius: 50%; pointer-events: none; }
-        @keyframes splashAnim { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
+        .drop { position: absolute; width: 4px; height: 12px; left: 23px; background: linear-gradient(to bottom, transparent, #fff, var(--blue)); border-radius: 2px; animation: dropDown 0.6s infinite linear; }
+        @keyframes dropDown { 0% { transform: translateY(-40px); opacity: 0; } 100% { transform: translateY(115px); opacity: 0; } }
 
         /* 彈窗系統 */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); backdrop-filter: blur(25px); padding: 25px; border-radius: 30px; z-index: 9000; width: 85%; max-width: 400px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 8999; }
         
-        .city-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .city-option { padding: 12px; background: rgba(0,0,0,0.05); border-radius: 12px; text-align: center; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-        .city-option.active { background: var(--blue); color: white; }
+        /* 聯絡資訊樣式 */
+        .contact-section { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border); }
+        .contact-tag { background: var(--dc-color); color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 
         .img-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9500; flex-direction: column; }
-        .img-viewport { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #mainMapImg { max-width: 100%; max-height: 100%; object-fit: contain !important; }
-
         .fav-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #cbd5e1; z-index: 5; }
         .fav-btn.active { color: var(--yellow); }
     </style>
@@ -83,17 +67,30 @@
 
 <div class="modal" id="cityModal">
     <h3 style="text-align: center; margin-top: 0;">🌍 選擇地區</h3>
-    <div class="city-grid" id="cityGrid"><div class="city-option active" onclick="setCity('', this)">全部</div></div>
+    <div class="city-grid" id="cityGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+        <div class="city-option active" style="padding: 10px; background: rgba(0,0,0,0.05); border-radius: 12px; text-align: center; cursor: pointer;" onclick="setCity('', this)">全部</div>
+    </div>
     <button class="btn-action" style="width: 100%; margin-top: 20px; justify-content: center;" onclick="closeAllModals()">取消</button>
 </div>
 
 <div class="modal" id="helpModal">
-    <h2 style="margin-top: 0; color: var(--blue); text-align: center;">WEI雨量觀測網功能導引</h2>
+    <h2 style="margin-top: 0; color: var(--blue); text-align: center;">WEI雨量觀測網</h2>
     <div style="font-size: 0.95rem; line-height: 1.8;">
         <p>💧 <b>CSS 原生雨滴</b>：效能升級，下雨測站特效穩定呈現。</p>
         <p>🔘 <b>大型切換鈕</b>：加大排序功能選單，點選更精確。</p>
         <p>🌍 <b>地區快速篩選</b>：點擊按鈕開啟全台縣市九宮格選單。</p>
-        <p>📥 <b>匯出觀測數據</b>：一鍵將當前雨量資料下載為 CSV。</p>
+        <p>⚡ <b>極速圖資中心</b>：預載入技術，切換雷達影像秒讀取。</p>
+        
+        <div class="contact-section">
+            <p style="margin-bottom: 8px; font-weight: bold; color: var(--text);">📞有任何建議或問題歡迎聯絡開發者</p>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-size: 0.9rem;">Discord:</span>
+                <span class="contact-tag">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.027-.07 8.82 8.82 0 0 1-1.248-.595.05.05 0 0 1-.005-.085c.084-.063.169-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.05.05 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.027.07c.236.466.51.91.819 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z"/></svg>
+                    wei0623._79891
+                </span>
+            </div>
+        </div>
     </div>
     <button class="btn-action" style="width: 100%; justify-content: center; margin-top: 20px; background: var(--blue); color: white; border: none; padding: 15px;" onclick="acceptHelp()">開始觀測</button>
 </div>
@@ -119,24 +116,21 @@
     <header>
         <h1 style="letter-spacing: 2px; font-weight: 900; margin: 0;">WEI雨量觀測網</h1>
         <span class="source-tag">📡 資料來源：中央氣象署 (CWA)</span>
-        <div class="sync-tag"><div class="status-dot"></div><span>更新時間(每十分鐘更新)：<b id="topUpdateTime">連線中...</b></span></div>
+        <div class="sync-tag"><div class="status-dot"></div><span>最後更新：<b id="topUpdateTime">連線中...</b></span></div>
     </header>
 
     <div class="controls-row">
         <input type="text" id="searchInput" oninput="updateDisplay()" placeholder="搜尋站名 (台/臺通用)...">
-        
         <div class="toggle-group">
             <button id="btn-sort-1h" class="toggle-btn active" onclick="setSort('rain1h')">時雨量</button>
             <button id="btn-sort-24h" class="toggle-btn" onclick="setSort('rain24h')">今日累積</button>
         </div>
-
         <button class="btn-action" onclick="document.getElementById('cityModal').style.display='block'; document.getElementById('overlay').style.display='block';">
             🌍 <span id="currentCityText">選擇地區</span>
         </button>
-        
         <button class="btn-action btn-theme" onclick="toggleTheme()">🌓 模式</button>
         <button class="btn-action" onclick="openMapCenter()">🗺️ 氣象圖資</button>
-        <button class="btn-action btn-download" onclick="exportCSV()">📥 匯出資料</button>
+        <button class="btn-action btn-download" onclick="exportCSV()">📥 匯出 CSV</button>
         <button class="btn-action" onclick="openHelp()">💡 功能說明</button>
     </div>
 
@@ -161,13 +155,14 @@
     const cityGrid = document.getElementById('cityGrid');
     counties.forEach(c => {
         const d = document.createElement('div'); d.className = 'city-option';
+        d.style.cssText = "padding: 10px; background: rgba(0,0,0,0.05); border-radius: 12px; text-align: center; cursor: pointer; font-size: 0.9rem;";
         d.innerText = c.replace('市','').replace('縣',''); d.onclick = () => setCity(c, d);
         cityGrid.appendChild(d);
     });
 
     function setCity(city, el) {
         selectedCity = city; document.getElementById('currentCityText').innerText = city || '選擇地區';
-        document.querySelectorAll('.city-option').forEach(o => o.classList.remove('active')); el.classList.add('active');
+        document.querySelectorAll('.city-option').forEach(o => o.style.background = 'rgba(0,0,0,0.05)'); el.style.background = 'var(--blue)'; el.style.color = 'white';
         closeAllModals(); updateDisplay();
     }
 
@@ -176,16 +171,6 @@
         document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-sort-${type === 'rain1h' ? '1h' : '24h'}`).classList.add('active');
         updateDisplay();
-    }
-
-    function createSplash(container, x, y) {
-        if (!container || container.childElementCount > 5) return;
-        const s = document.createElement('div'); s.className = 'splash';
-        const tx = (Math.random()-0.5)*20, ty = -Math.random()*15;
-        s.style.setProperty('--tx', `${tx}px`); s.style.setProperty('--ty', `${ty}px`);
-        s.style.left = x+'px'; s.style.top = y+'px';
-        s.style.animation = `splashAnim 0.4s ease-out forwards`;
-        container.appendChild(s); setTimeout(() => s.remove(), 400);
     }
 
     async function fetchData() {
@@ -202,35 +187,25 @@
         activeTimers.forEach(t => clearInterval(t)); activeTimers = [];
         const grid = document.getElementById('weather-grid'); grid.innerHTML = '';
         let kw = document.getElementById('searchInput').value.trim().toLowerCase().replace(/台/g, '臺');
-        
         let list = allStations.filter(s => s.StationName.replace(/台/g,'臺').includes(kw) && (selectedCity==='' || s.GeoInfo.CountyName===selectedCity));
         list.sort((a,b) => (favorites.includes(b.StationId)-favorites.includes(a.StationId)) || (parseFloat(activeSort==='rain1h'?b.RainfallElement.Past1hr.Precipitation:b.RainfallElement.Now.Precipitation) - parseFloat(activeSort==='rain1h'?a.RainfallElement.Past1hr.Precipitation:a.RainfallElement.Now.Precipitation)));
 
         list.forEach(s => {
             const h1 = parseFloat(s.RainfallElement.Past1hr.Precipitation) || 0, day = parseFloat(s.RainfallElement.Now.Precipitation) || 0;
-            const wl = Math.min(day, 100), isF = favorites.includes(s.StationId);
+            const wl = Math.min(day, 100);
             const card = document.createElement('div'); card.className = 'card';
-            card.innerHTML = `<div class="fav-btn ${isF?'active':''}" onclick="event.stopPropagation(); toggleFav('${s.StationId}')">★</div><b>${s.StationName}</b><br><small>${s.GeoInfo.CountyName}</small><div style="display:flex;align-items:center;justify-content:space-around;margin-top:10px;"><div class="rain-gauge" id="g-${s.StationId}"><div class="wave" style="height:${wl}%"></div>${h1>0?'<div class="drop"></div>':''}</div><div style="text-align:right"><div style="font-size:2rem;font-weight:900;">${(activeSort==='rain1h'?h1:day).toFixed(1)}<span style="font-size:0.75rem">${activeSort==='rain1h'?'mm/h':'mm'}</span></div><div style="font-size:0.65rem;opacity:0.6;font-weight:bold;">${activeSort==='rain1h'?'時雨量':'今日累積'}</div></div></div>`;
+            card.innerHTML = `<div class="fav-btn ${favorites.includes(s.StationId)?'active':''}" onclick="event.stopPropagation(); toggleFav('${s.StationId}')">★</div><b>${s.StationName}</b><br><small>${s.GeoInfo.CountyName}</small><div style="display:flex;align-items:center;justify-content:space-around;margin-top:10px;"><div class="rain-gauge" id="g-${s.StationId}"><div class="wave" style="height:${wl}%"></div>${h1>0?'<div class="drop"></div>':''}</div><div style="text-align:right"><div style="font-size:2rem;font-weight:900;">${(activeSort==='rain1h'?h1:day).toFixed(1)}<span style="font-size:0.75rem">${activeSort==='rain1h'?'mm/h':'mm'}</span></div><div style="font-size:0.65rem;opacity:0.6;font-weight:bold;">${activeSort==='rain1h'?'時雨量':'今日累積'}</div></div></div>`;
             grid.appendChild(card);
-            if (h1 > 0) { const t = setInterval(() => { const g = document.getElementById(`g-${s.StationId}`); if(g) createSplash(g, 24, 100-wl); }, 900); activeTimers.push(t); }
         });
     }
 
-    // --- 📥 匯出 CSV 函數 ---
     function exportCSV() {
         let csv = "測站名稱,縣市,時雨量(mm/h),累積雨量(mm),更新時間\n";
         allStations.forEach(s => {
-            const h1 = s.RainfallElement?.Past1hr?.Precipitation || 0;
-            const day = s.RainfallElement?.Now?.Precipitation || 0;
-            csv += `${s.StationName},${s.GeoInfo.CountyName},${h1},${day},${s.ObsTime.DateTime}\n`;
+            csv += `${s.StationName},${s.GeoInfo.CountyName},${s.RainfallElement?.Past1hr?.Precipitation || 0},${s.RainfallElement?.Now?.Precipitation || 0},${s.ObsTime.DateTime}\n`;
         });
         const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", `雨量觀測報表_${new Date().toLocaleDateString()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `雨量觀測報表.csv`); link.click();
     }
 
     function openMapCenter() { document.getElementById('mapModal').style.display='flex'; switchMap('rain', document.querySelector('#mapModal button')); }
@@ -241,10 +216,10 @@
     function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme')==='light'?'dark':'light'); }
     function closeAllModals() { document.querySelectorAll('.modal, .img-modal').forEach(m => m.style.display='none'); document.getElementById('overlay').style.display='none'; }
     function openHelp() { document.getElementById('helpModal').style.display='block'; document.getElementById('overlay').style.display='block'; }
-    function acceptHelp() { localStorage.setItem('wei_help_vUI', 'true'); closeAllModals(); }
+    function acceptHelp() { localStorage.setItem('wei_help_vContact', 'true'); closeAllModals(); }
     function toggleFav(id) { favorites = favorites.includes(id) ? favorites.filter(f=>f!==id) : [...favorites, id]; localStorage.setItem('rain_fav', JSON.stringify(favorites)); updateDisplay(); }
 
-    fetchData(); if (!localStorage.getItem('wei_help_vUI')) setTimeout(openHelp, 600);
+    fetchData(); if (!localStorage.getItem('wei_help_vContact')) setTimeout(openHelp, 600);
     setInterval(fetchData, 600000);
 </script>
 </body>
